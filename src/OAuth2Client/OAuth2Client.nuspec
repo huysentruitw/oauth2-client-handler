@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://raw.githubusercontent.com/huysentruitw/oauth2-client-handler/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/huysentruitw/oauth2-client-handler</projectUrl>
+    <iconUrl></iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Managed .NET (C#) library for use with HttpClient to transparantly call authorized WebAPI </description>
+    <copyright>Copyright 2016 CogniStreamer, Huysentruit Wouter</copyright>
+  </metadata>
+</package>
