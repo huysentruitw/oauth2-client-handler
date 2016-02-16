@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("OAuth2Client")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("CogniStreamer")]
+[assembly: AssemblyCompany("CogniStreamer, Huysentruit Wouter")]
 [assembly: AssemblyProduct("OAuth2Client")]
 [assembly: AssemblyCopyright("Copyright ©  2016 CogniStreamer, Huysentruit Wouter")]
 [assembly: AssemblyTrademark("")]

@@ -8,7 +8,7 @@
     <owners>$author$</owners>
     <licenseUrl>https://raw.githubusercontent.com/huysentruitw/oauth2-client-handler/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/huysentruitw/oauth2-client-handler</projectUrl>
-    <iconUrl></iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/huysentruitw/oauth2-client-handler/master/icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Managed .NET (C#) library for use with HttpClient to transparantly call authorized WebAPI </description>
     <copyright>Copyright 2016 CogniStreamer, Huysentruit Wouter</copyright>
