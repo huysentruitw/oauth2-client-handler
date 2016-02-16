@@ -23,7 +23,7 @@ namespace OAuth2ClientHandler
             this.options = options;
             InnerHandler = options.InnerHandler ?? new HttpClientHandler();
             ownsHandler = options.InnerHandler == null;
-            authorizer = new Authorizer.Authorizer(options.AuthorizerOptions, () => new HttpClient(InnerHandler));
+            authorizer = new Authorizer.Authorizer(options.AuthorizerOptions, () => new HttpClient(InnerHandler, false));
         }
 
         protected override void Dispose(bool disposing)
