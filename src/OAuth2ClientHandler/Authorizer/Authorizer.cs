@@ -49,10 +49,10 @@ namespace OAuth2ClientHandler.Authorizer
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthorizationHeaderValue());
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var content = new FormUrlEncodedContent(new[]
-                {
-                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                });
+                var properties = new Dictionary<string, string> { { "grant_type", "client_credentials" } };
+                if (options.Scope != null) properties.Add("scope", string.Join(" ", options.Scope));
+
+                var content = new FormUrlEncodedContent(properties);
 
                 var response = await client.PostAsync(options.TokenEndpointUrl, content, cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;

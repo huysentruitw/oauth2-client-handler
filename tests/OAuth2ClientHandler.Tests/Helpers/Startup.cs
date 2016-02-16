@@ -30,6 +30,11 @@ namespace OAuth2ClientHandler
                         },
                         OnGrantClientCredentials = (ctx) =>
                         {
+                            if (ctx.Scope.Contains("testscope"))
+                            {
+                                ctx.SetError("testscope_ok");
+                                return Task.FromResult(0);
+                            }
                             var identity = new ClaimsIdentity(OAuthDefaults.AuthenticationType);
                             var ticket = new AuthenticationTicket(identity, new AuthenticationProperties());
                             ctx.Validated(ticket);

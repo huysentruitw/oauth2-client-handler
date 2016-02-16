@@ -105,5 +105,23 @@ namespace OAuth2ClientHandler.Tests
             var ex = Assert.Throws<ProtocolException>(async () => await authorizer.GetAccessToken());
             Assert.AreEqual(HttpStatusCode.NotFound, ex.StatusCode);
         }
+
+        [Test]
+        public void GetAccessToken_AddScopeOption_ShouldRequestScope()
+        {
+            var options = new AuthorizerOptions
+            {
+                AuthorizeEndpointUrl = new Uri("http://localhost/authorize"),
+                TokenEndpointUrl = new Uri("http://localhost/token"),
+                ClientId = "MyId",
+                ClientSecret = "MySecret",
+                GrantType = GrantType.ClientCredentials,
+                Scope = new[] { "testscope" }
+            };
+
+            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
+            var ex = Assert.Throws<ProtocolException>(async () => await authorizer.GetAccessToken());
+            Assert.IsTrue(ex.Message.Contains("testscope_ok"));
+        }
     }
 }
