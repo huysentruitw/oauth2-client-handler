@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace OAuth2ClientHandler.Authorizer
 {
@@ -56,12 +56,12 @@ namespace OAuth2ClientHandler.Authorizer
 
                 var response = await client.PostAsync(options.TokenEndpointUrl, content, cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
-                var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
-                    RaiseProtocolException(response.StatusCode, responseContent);
+                    RaiseProtocolException(response.StatusCode, await response.Content.ReadAsStringAsync());
 
-                return JsonConvert.DeserializeObject<TokenResponse>(responseContent);
+                var serializer = new DataContractJsonSerializer(typeof(TokenResponse));
+                return serializer.ReadObject(await response.Content.ReadAsStreamAsync()) as TokenResponse;
             }
         }
 

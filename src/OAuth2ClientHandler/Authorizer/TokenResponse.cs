@@ -1,17 +1,18 @@
 ﻿using System;
-using Newtonsoft.Json;
+using System.Runtime.Serialization;
 
 namespace OAuth2ClientHandler.Authorizer
 {
+    [DataContract]
     internal class TokenResponse
     {
-        [JsonProperty("access_token")]
+        [DataMember(Name = "access_token")]
         public string AccessToken { get; set; }
-        [JsonProperty("refresh_token")]
+        [DataMember(Name = "refresh_token")]
         public string RefreshToken { get; set; }
-        [JsonProperty("token_type")]
+        [DataMember(Name = "token_type")]
         public string TokenType { get; set; }
-        [JsonProperty("expires_in")]
+        [DataMember(Name = "expires_in")]
         public int ExpiresInSeconds { private get; set; }
 
         public TimeSpan ExpiresIn { get { return TimeSpan.FromSeconds(ExpiresInSeconds); } }
