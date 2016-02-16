@@ -12,5 +12,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Managed .NET (C#) library for use with HttpClient to transparantly call authorized WebAPI </description>
     <copyright>Copyright 2016 CogniStreamer, Huysentruit Wouter</copyright>
+    <dependencies>
+    </dependencies>
   </metadata>
 </package>
