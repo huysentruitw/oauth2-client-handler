@@ -28,19 +28,21 @@ namespace OAuth2ClientHandler.Authorizer
         {
         }
 
-        public async Task<TokenResponse> GetAccessToken(CancellationToken? cancellationToken = null)
+        public async Task<TokenResponse> GetToken(CancellationToken? cancellationToken = null)
         {
             cancellationToken = cancellationToken ?? new CancellationToken(false);
             switch (options.GrantType)
             {
                 case GrantType.ClientCredentials:
-                    return await GetAccessTokenWithClientCredentials(cancellationToken.Value);
+                    return await GetTokenWithClientCredentials(cancellationToken.Value);
+                case GrantType.ResourceOwnerPasswordCredentials:
+                    return await GetTokenWithResourceOwnerPasswordCredentials(cancellationToken.Value);
                 default:
                     throw new NotSupportedException(string.Format("Requested grant type '{0}' is not supported", options.GrantType));
             }
         }
 
-        private async Task<TokenResponse> GetAccessTokenWithClientCredentials(CancellationToken cancellationToken)
+        private async Task<TokenResponse> GetTokenWithClientCredentials(CancellationToken cancellationToken)
         {
             if (options.TokenEndpointUrl == null) throw new ArgumentNullException("TokenEndpointUrl");
             if (!options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("TokenEndpointUrl must be absolute");
@@ -58,7 +60,45 @@ namespace OAuth2ClientHandler.Authorizer
                 if (cancellationToken.IsCancellationRequested) return null;
 
                 if (!response.IsSuccessStatusCode)
+                {
                     RaiseProtocolException(response.StatusCode, await response.Content.ReadAsStringAsync());
+                    return null;
+                }
+
+                var serializer = new DataContractJsonSerializer(typeof(TokenResponse));
+                return serializer.ReadObject(await response.Content.ReadAsStreamAsync()) as TokenResponse;
+            }
+        }
+
+        private async Task<TokenResponse> GetTokenWithResourceOwnerPasswordCredentials(CancellationToken cancellationToken)
+        {
+            if (options.TokenEndpointUrl == null) throw new ArgumentNullException("TokenEndpointUrl");
+            if (!options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("TokenEndpointUrl must be absolute");
+            if (options.Username == null) throw new ArgumentNullException("Username");
+            if (options.Password == null) throw new ArgumentNullException("Password");
+            using (var client = this.createHttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthorizationHeaderValue());
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var properties = new Dictionary<string, string>
+                {
+                    { "grant_type", "password" },
+                    { "username", options.Username },
+                    { "password", options.Password }
+                };
+                if (options.Scope != null) properties.Add("scope", string.Join(" ", options.Scope));
+
+                var content = new FormUrlEncodedContent(properties);
+
+                var response = await client.PostAsync(options.TokenEndpointUrl, content, cancellationToken);
+                if (cancellationToken.IsCancellationRequested) return null;
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    RaiseProtocolException(response.StatusCode, await response.Content.ReadAsStringAsync());
+                    return null;
+                }
 
                 var serializer = new DataContractJsonSerializer(typeof(TokenResponse));
                 return serializer.ReadObject(await response.Content.ReadAsStreamAsync()) as TokenResponse;

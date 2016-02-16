@@ -2,6 +2,7 @@
 {
     public enum GrantType
     {
-        ClientCredentials
+        ClientCredentials,
+        ResourceOwnerPasswordCredentials,
     }
 }

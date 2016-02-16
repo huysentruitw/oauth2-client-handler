@@ -11,7 +11,7 @@
     <iconUrl>https://raw.githubusercontent.com/huysentruitw/oauth2-client-handler/master/icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Managed .NET (C#) library for use with HttpClient to transparantly call authorized WebAPI </description>
-    <copyright>Copyright 2016 CogniStreamer, Huysentruit Wouter</copyright>
+    <copyright>Copyright 2016 Huysentruit Wouter</copyright>
     <dependencies>
     </dependencies>
   </metadata>

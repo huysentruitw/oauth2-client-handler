@@ -64,7 +64,7 @@ namespace OAuth2ClientHandler
             {
                 semaphore.Wait(cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
-                tokenResponse = tokenResponse ?? await authorizer.GetAccessToken(cancellationToken);
+                tokenResponse = tokenResponse ?? await authorizer.GetToken(cancellationToken);
                 return tokenResponse;
             }
             finally
@@ -79,7 +79,7 @@ namespace OAuth2ClientHandler
             {
                 semaphore.Wait(cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
-                tokenResponse = await authorizer.GetAccessToken(cancellationToken);
+                tokenResponse = await authorizer.GetToken(cancellationToken);
                 return tokenResponse;
             }
             finally

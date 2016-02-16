@@ -10,6 +10,8 @@ namespace OAuth2ClientHandler.Authorizer
         public Uri AuthorizeEndpointUrl { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
         public IEnumerable<string> Scope { get; set; }
         public GrantType GrantType { get; set; }
         public Action<HttpStatusCode, string> OnError { get; set; }

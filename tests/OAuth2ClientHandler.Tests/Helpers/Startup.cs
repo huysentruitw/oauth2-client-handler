@@ -40,6 +40,23 @@ namespace OAuth2ClientHandler
                             ctx.Validated(ticket);
                             return Task.FromResult(0);
                         },
+                        OnGrantResourceOwnerCredentials = (ctx) =>
+                        {
+                            if (ctx.Scope.Contains("othertestscope"))
+                            {
+                                ctx.SetError("othertestscope_ok");
+                                return Task.FromResult(0);
+                            }
+                            if (!ctx.UserName.Equals("MyUsername") || !ctx.Password.Equals("MyPassword"))
+                            {
+                                ctx.SetError("invalid_grant");
+                                return Task.FromResult(0);
+                            }
+                            var identity = new ClaimsIdentity(OAuthDefaults.AuthenticationType);
+                            var ticket = new AuthenticationTicket(identity, new AuthenticationProperties());
+                            ctx.Validated(ticket);
+                            return Task.FromResult(0);
+                        },
                     }
                 });
 
