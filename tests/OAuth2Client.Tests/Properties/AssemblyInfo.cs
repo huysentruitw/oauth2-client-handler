@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("OAuth2Client.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Huysentruit")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("OAuth2Client.Tests")]
-[assembly: AssemblyCopyright("Copyright ©  2016 Huysentruit")]
+[assembly: AssemblyCopyright("Copyright ©  2016 CogniStreamer, Huysentruit Wouter")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
