@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
-using OAuth2Client.Authorizer;
+using OAuth2ClientHandler.Authorizer;
 
-namespace OAuth2Client
+namespace OAuth2ClientHandler
 {
     public class OAuthHttpHandlerOptions
     {

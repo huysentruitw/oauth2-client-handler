@@ -3,7 +3,7 @@
   <metadata>
     <id>$id$</id>
     <version>$version$</version>
-    <title>OAuth2ClientHandler</title>
+    <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
     <licenseUrl>https://raw.githubusercontent.com/huysentruitw/oauth2-client-handler/master/LICENSE</licenseUrl>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace OAuth2Client.Authorizer
+namespace OAuth2ClientHandler.Authorizer
 {
     public class AuthorizerOptions
     {

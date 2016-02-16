@@ -1,6 +1,6 @@
 ﻿using System.Web.Http;
 
-namespace OAuth2Client.Tests.Helpers
+namespace OAuth2ClientHandler.Tests.Helpers
 {
     [RoutePrefix("api")]
     public class TestController : ApiController

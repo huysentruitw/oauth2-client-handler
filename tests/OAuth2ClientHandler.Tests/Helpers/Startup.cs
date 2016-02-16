@@ -6,7 +6,7 @@ using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.OAuth;
 using Owin;
 
-namespace OAuth2Client
+namespace OAuth2ClientHandler
 {
     internal class Startup
     {

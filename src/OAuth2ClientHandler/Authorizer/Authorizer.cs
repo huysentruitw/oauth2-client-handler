@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace OAuth2Client.Authorizer
+namespace OAuth2ClientHandler.Authorizer
 {
     internal class Authorizer : IAuthorizer
     {

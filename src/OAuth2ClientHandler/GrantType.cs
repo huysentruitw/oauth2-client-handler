@@ -1,4 +1,4 @@
-﻿namespace OAuth2Client
+﻿namespace OAuth2ClientHandler
 {
     public enum GrantType
     {

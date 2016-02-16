@@ -4,9 +4,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using OAuth2Client.Authorizer;
+using OAuth2ClientHandler.Authorizer;
 
-namespace OAuth2Client
+namespace OAuth2ClientHandler
 {
     public class OAuthHttpHandler : DelegatingHandler
     {

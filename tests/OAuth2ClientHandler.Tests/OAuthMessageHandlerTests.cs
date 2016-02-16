@@ -4,9 +4,9 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Owin.Testing;
 using NUnit.Framework;
-using OAuth2Client.Authorizer;
+using OAuth2ClientHandler.Authorizer;
 
-namespace OAuth2Client.Tests
+namespace OAuth2ClientHandler.Tests
 {
     [TestFixture]
     public class OAuthMessageHandlerTests
