@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace OAuth2ClientHandler.Authorizer
 {
     [DataContract]
-    internal class TokenResponse
+    public class TokenResponse
     {
         [DataMember(Name = "access_token")]
         public string AccessToken { get; set; }

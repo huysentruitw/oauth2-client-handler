@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -42,6 +43,20 @@ namespace OAuth2ClientHandler.Authorizer
             }
         }
 
+        public async Task<TokenResponse> RefreshToken(TokenResponse tokenResponse, CancellationToken? cancellationToken = null)
+        {
+            cancellationToken = cancellationToken ?? new CancellationToken(false);
+            switch (options.GrantType)
+            {
+                case GrantType.ClientCredentials:
+                    return await RefreshTokenWithClientCredentials(tokenResponse, cancellationToken.Value);
+                case GrantType.ResourceOwnerPasswordCredentials:
+                    return await GetTokenWithResourceOwnerPasswordCredentials(cancellationToken.Value);
+                default:
+                    throw new NotSupportedException(string.Format("Requested grant type '{0}' is not supported", options.GrantType));
+            }
+        }
+
         private async Task<TokenResponse> GetTokenWithClientCredentials(CancellationToken cancellationToken)
         {
             if (options.TokenEndpointUrl == null) throw new ArgumentNullException("TokenEndpointUrl");
@@ -65,8 +80,38 @@ namespace OAuth2ClientHandler.Authorizer
                     return null;
                 }
 
-                var serializer = new DataContractJsonSerializer(typeof(TokenResponse));
-                return serializer.ReadObject(await response.Content.ReadAsStreamAsync()) as TokenResponse;
+                return JsonConvert.DeserializeObject<TokenResponse>(await response.Content.ReadAsStringAsync());
+            }
+        }
+
+        private async Task<TokenResponse> RefreshTokenWithClientCredentials(TokenResponse tokenResponse, CancellationToken cancellationToken)
+        {
+            if (options.TokenEndpointUrl == null) throw new ArgumentNullException("TokenEndpointUrl");
+            if (tokenResponse == null || tokenResponse.RefreshToken == null) throw new ArgumentNullException("TokenResponse");
+            if (!options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("TokenEndpointUrl must be absolute");
+            using (var client = this.createHttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthorizationHeaderValue());
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var properties = new Dictionary<string, string> { 
+                    { "grant_type", "refresh_token" },
+                    {"refresh_token", tokenResponse.RefreshToken }
+                };
+                if (options.Scope != null) properties.Add("scope", string.Join(" ", options.Scope));
+
+                var content = new FormUrlEncodedContent(properties);
+
+                var response = await client.PostAsync(options.TokenEndpointUrl, content, cancellationToken);
+                if (cancellationToken.IsCancellationRequested) return null;
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    RaiseProtocolException(response.StatusCode, await response.Content.ReadAsStringAsync());
+                    return null;
+                }
+
+                return JsonConvert.DeserializeObject<TokenResponse>(await response.Content.ReadAsStringAsync());
             }
         }
 
@@ -100,8 +145,7 @@ namespace OAuth2ClientHandler.Authorizer
                     return null;
                 }
 
-                var serializer = new DataContractJsonSerializer(typeof(TokenResponse));
-                return serializer.ReadObject(await response.Content.ReadAsStreamAsync()) as TokenResponse;
+                return JsonConvert.DeserializeObject<TokenResponse>(await response.Content.ReadAsStringAsync());
             }
         }
 
