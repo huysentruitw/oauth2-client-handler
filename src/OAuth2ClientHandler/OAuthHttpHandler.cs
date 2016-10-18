@@ -14,7 +14,7 @@ namespace OAuth2ClientHandler
         private OAuthHttpHandlerOptions options;
         private bool ownsHandler = false;
         private IAuthorizer authorizer;
-        private TokenResponse tokenResponse;
+        internal TokenResponse tokenResponse;
         private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         public OAuthHttpHandler(OAuthHttpHandlerOptions options)
@@ -58,7 +58,7 @@ namespace OAuth2ClientHandler
             return response;
         }
 
-        private async Task<TokenResponse> GetTokenResponse(CancellationToken cancellationToken)
+        internal async Task<TokenResponse> GetTokenResponse(CancellationToken cancellationToken)
         {
             try
             {
@@ -73,14 +73,18 @@ namespace OAuth2ClientHandler
             }
         }
 
-        private async Task<TokenResponse> RefreshTokenResponse(CancellationToken cancellationToken)
+        internal async Task<TokenResponse> RefreshTokenResponse(CancellationToken cancellationToken)
         {
             try
             {
                 semaphore.Wait(cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
-                tokenResponse = await authorizer.GetToken(cancellationToken);
+                tokenResponse = await authorizer.RefreshToken(tokenResponse, cancellationToken);
                 return tokenResponse;
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
             finally
             {
