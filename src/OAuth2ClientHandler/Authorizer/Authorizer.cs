@@ -87,7 +87,7 @@ namespace OAuth2ClientHandler.Authorizer
         private async Task<TokenResponse> RefreshTokenWithClientCredentials(TokenResponse tokenResponse, CancellationToken cancellationToken)
         {
             if (options.TokenEndpointUrl == null) throw new ArgumentNullException("TokenEndpointUrl");
-            if (tokenResponse == null || tokenResponse.RefreshToken == null) throw new ArgumentNullException("TokenResponse");
+            if (tokenResponse == null || tokenResponse.RefreshToken == null) return null;
             if (!options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("TokenEndpointUrl must be absolute");
             using (var client = this.createHttpClient())
             {
