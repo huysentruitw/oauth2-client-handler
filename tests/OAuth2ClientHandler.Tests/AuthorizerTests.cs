@@ -7,19 +7,18 @@ using OAuth2ClientHandler.Authorizer;
 
 namespace OAuth2ClientHandler.Tests
 {
-    [TestFixture]
-    public class AuthorizerTests
+    public abstract class AuthorizerTests : IDisposable
     {
-        private TestServer server;
+        private readonly CredentialsType credentialsType;
+        private readonly TestServer server;
 
-        [TestFixtureSetUp]
-        public void FixtureSetUp()
+        protected AuthorizerTests(CredentialsType credentialsType)
         {
-            server = TestServer.Create<Startup>();
+            this.credentialsType = credentialsType;
+            this.server = TestServer.Create(new Startup(credentialsType).Configuration);
         }
 
-        [TestFixtureTearDown]
-        public void FixtureTearDown()
+        public void Dispose()
         {
             server.Dispose();
         }
@@ -33,7 +32,8 @@ namespace OAuth2ClientHandler.Tests
                 TokenEndpointUrl = new Uri("http://localhost/token"),
                 ClientId = "MyId",
                 ClientSecret = "MySecret",
-                GrantType = GrantType.ClientCredentials
+                GrantType = GrantType.ClientCredentials,
+                CredentialsType = credentialsType
             };
 
             var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
@@ -50,7 +50,8 @@ namespace OAuth2ClientHandler.Tests
                 TokenEndpointUrl = new Uri("http://localhost/token"),
                 ClientId = "WrongId",
                 ClientSecret = "WrongSecret",
-                GrantType = GrantType.ClientCredentials
+                GrantType = GrantType.ClientCredentials,
+                CredentialsType = credentialsType
             };
 
             var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
@@ -74,6 +75,7 @@ namespace OAuth2ClientHandler.Tests
                 ClientId = "WrongId",
                 ClientSecret = "WrongSecret",
                 GrantType = GrantType.ClientCredentials,
+                CredentialsType = credentialsType,
                 OnError = (statusCode, message) =>
                 {
                     errorStatusCode = statusCode;
@@ -98,7 +100,8 @@ namespace OAuth2ClientHandler.Tests
                 TokenEndpointUrl = new Uri("http://localhost/invalid"),
                 ClientId = "MyId",
                 ClientSecret = "MySecret",
-                GrantType = GrantType.ClientCredentials
+                GrantType = GrantType.ClientCredentials,
+                CredentialsType = credentialsType
             };
 
             var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
@@ -116,6 +119,7 @@ namespace OAuth2ClientHandler.Tests
                 ClientId = "MyId",
                 ClientSecret = "MySecret",
                 GrantType = GrantType.ClientCredentials,
+                CredentialsType = credentialsType,
                 Scope = new[] { "testscope" }
             };
 
@@ -135,7 +139,8 @@ namespace OAuth2ClientHandler.Tests
                 ClientSecret = "MySecret",
                 Username = "MyUsername",
                 Password = "MyPassword",
-                GrantType = GrantType.ResourceOwnerPasswordCredentials
+                GrantType = GrantType.ResourceOwnerPasswordCredentials,
+                CredentialsType = credentialsType
             };
 
             var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
@@ -154,7 +159,8 @@ namespace OAuth2ClientHandler.Tests
                 ClientSecret = "MySecret",
                 Username = "MyUsername",
                 Password = "WrongPassword",
-                GrantType = GrantType.ResourceOwnerPasswordCredentials
+                GrantType = GrantType.ResourceOwnerPasswordCredentials,
+                CredentialsType = credentialsType
             };
 
             var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
@@ -180,6 +186,7 @@ namespace OAuth2ClientHandler.Tests
                 Username = "MyUsername",
                 Password = "WrongPassword",
                 GrantType = GrantType.ResourceOwnerPasswordCredentials,
+                CredentialsType = credentialsType,
                 OnError = (statusCode, message) =>
                 {
                     errorStatusCode = statusCode;
@@ -207,6 +214,7 @@ namespace OAuth2ClientHandler.Tests
                 Username = "MyUsername",
                 Password = "MyPassword",
                 GrantType = GrantType.ResourceOwnerPasswordCredentials,
+                CredentialsType = credentialsType,
                 Scope = new[] { "othertestscope" }
             };
 

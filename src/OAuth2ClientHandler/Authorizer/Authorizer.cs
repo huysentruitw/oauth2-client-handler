@@ -42,18 +42,33 @@ namespace OAuth2ClientHandler.Authorizer
             }
         }
 
+        private void AuthenticateRequest(HttpClient client, Dictionary<string, string> form)
+        {
+            switch (options.CredentialsType)
+            {
+                case CredentialsType.Basic:
+                    client.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Basic", GetBasicAuthorizationHeaderValue());
+                    break;
+                case CredentialsType.Form:
+                    form.Add("client_id", options.ClientId);
+                    form.Add("client_secret", options.ClientSecret);
+                    break;
+            }
+        }
+
         private async Task<TokenResponse> GetTokenWithClientCredentials(CancellationToken cancellationToken)
         {
             if (options.TokenEndpointUrl == null) throw new ArgumentNullException("TokenEndpointUrl");
             if (!options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("TokenEndpointUrl must be absolute");
             using (var client = this.createHttpClient())
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthorizationHeaderValue());
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 var properties = new Dictionary<string, string> { { "grant_type", "client_credentials" } };
                 if (options.Scope != null) properties.Add("scope", string.Join(" ", options.Scope));
 
+                AuthenticateRequest(client, properties);
                 var content = new FormUrlEncodedContent(properties);
 
                 var response = await client.PostAsync(options.TokenEndpointUrl, content, cancellationToken);
@@ -78,7 +93,6 @@ namespace OAuth2ClientHandler.Authorizer
             if (options.Password == null) throw new ArgumentNullException("Password");
             using (var client = this.createHttpClient())
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthorizationHeaderValue());
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 var properties = new Dictionary<string, string>
@@ -89,6 +103,7 @@ namespace OAuth2ClientHandler.Authorizer
                 };
                 if (options.Scope != null) properties.Add("scope", string.Join(" ", options.Scope));
 
+                AuthenticateRequest(client, properties);
                 var content = new FormUrlEncodedContent(properties);
 
                 var response = await client.PostAsync(options.TokenEndpointUrl, content, cancellationToken);
