@@ -93,6 +93,8 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="AuthorizerBasicCredentialsTests.cs" />
+    <Compile Include="AuthorizerFormCredentialsTests.cs" />
     <Compile Include="AuthorizerTests.cs" />
     <Compile Include="Helpers\TestController.cs" />
     <Compile Include="OAuthMessageHandlerTests.cs" />

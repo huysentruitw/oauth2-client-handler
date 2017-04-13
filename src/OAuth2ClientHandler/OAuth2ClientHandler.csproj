@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CredentialsType.cs" />
     <Compile Include="Authorizer\IAuthorizer.cs" />
     <Compile Include="Authorizer\Authorizer.cs" />
     <Compile Include="Authorizer\AuthorizerOptions.cs" />

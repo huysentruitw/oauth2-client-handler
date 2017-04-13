@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.Owin;
@@ -10,6 +11,27 @@ namespace OAuth2ClientHandler
 {
     internal class Startup
     {
+        private readonly CredentialsType credentialsType;
+
+        public Startup(CredentialsType credentialsType)
+        {
+            this.credentialsType = credentialsType;
+        }
+
+        private bool TryGetCredentials(OAuthValidateClientAuthenticationContext context, out string clientId, out string clientSecret)
+        {
+            switch (credentialsType)
+            {
+                case CredentialsType.Basic:
+                    return context.TryGetBasicCredentials(out clientId, out clientSecret);
+                case CredentialsType.Form:
+                    return context.TryGetFormCredentials(out clientId, out clientSecret);
+                default:
+                    clientId = clientSecret = null;
+                    return false;
+            }
+        }
+
         public void Configuration(IAppBuilder app)
         {
             app.UseOAuthAuthorizationServer(new OAuthAuthorizationServerOptions
@@ -22,7 +44,7 @@ namespace OAuth2ClientHandler
                         OnValidateClientAuthentication = (ctx) =>
                         {
                             string clientId, clientSecret;
-                            if (ctx.TryGetBasicCredentials(out clientId, out clientSecret) &&
+                            if (TryGetCredentials(ctx, out clientId, out clientSecret) &&
                                 clientId.Equals("MyId") && clientSecret.Equals("MySecret"))
                                 ctx.Validated(clientId);
                             else ctx.Rejected();

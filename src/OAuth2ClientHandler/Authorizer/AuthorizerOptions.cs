@@ -14,6 +14,7 @@ namespace OAuth2ClientHandler.Authorizer
         public string Password { get; set; }
         public IEnumerable<string> Scope { get; set; }
         public GrantType GrantType { get; set; }
+        public CredentialsType CredentialsType { get; set; }
         public Action<HttpStatusCode, string> OnError { get; set; }
     }
 }
