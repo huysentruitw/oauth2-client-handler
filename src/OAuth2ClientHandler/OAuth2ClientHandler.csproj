@@ -46,6 +46,7 @@
     <Compile Include="Authorizer\IAuthorizer.cs" />
     <Compile Include="Authorizer\Authorizer.cs" />
     <Compile Include="Authorizer\AuthorizerOptions.cs" />
+    <Compile Include="Authorizer\CredentialTransportMethod.cs" />
     <Compile Include="GrantType.cs" />
     <Compile Include="OAuthHttpHandler.cs" />
     <Compile Include="OAuthHttpHandlerOptions.cs" />

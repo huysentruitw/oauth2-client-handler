@@ -42,6 +42,24 @@ namespace OAuth2ClientHandler.Tests
         }
 
         [Test]
+        public async Task GetToken_ValidClientCredentials_FormsAuthentication_ReturnsValidAccessToken()
+        {
+            var options = new AuthorizerOptions
+            {
+                AuthorizeEndpointUrl = new Uri("http://localhost/authorize"),
+                TokenEndpointUrl = new Uri("http://localhost/token"),
+                ClientId = "MyFormId",
+                ClientSecret = "MyFormSecret",
+                GrantType = GrantType.ClientCredentials,
+                CredentialTransportMethod = CredentialTransportMethod.FormAuthenticationCredentials
+            };
+
+            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
+            var result = await authorizer.GetToken();
+            Assert.NotNull(result.AccessToken);
+        }
+
+        [Test]
         public void GetToken_InvalidClientCredentialsWithoutOnErrorCallback_ThrowsProtocolException()
         {
             var options = new AuthorizerOptions

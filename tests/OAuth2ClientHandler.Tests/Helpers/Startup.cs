@@ -21,10 +21,9 @@ namespace OAuth2ClientHandler
                     {
                         OnValidateClientAuthentication = (ctx) =>
                         {
-                            string clientId, clientSecret;
-                            if (ctx.TryGetBasicCredentials(out clientId, out clientSecret) &&
-                                clientId.Equals("MyId") && clientSecret.Equals("MySecret"))
-                                ctx.Validated(clientId);
+                            string clientId;
+                            if (HasValidBasicCredentials(ctx, out clientId)) ctx.Validated(clientId);
+                            else if (HasValidFormCredentials(ctx, out clientId)) ctx.Validated(clientId);
                             else ctx.Rejected();
                             return Task.FromResult(0);
                         },
@@ -68,6 +67,22 @@ namespace OAuth2ClientHandler
             var config = new HttpConfiguration();
             config.MapHttpAttributeRoutes();
             app.UseWebApi(config);
+        }
+
+        private static bool HasValidBasicCredentials(OAuthValidateClientAuthenticationContext ctx, out string clientId)
+        {
+            string clientSecret;
+            return ctx.TryGetBasicCredentials(out clientId, out clientSecret)
+                   && clientId.Equals("MyId")
+                   && clientSecret.Equals("MySecret");
+        }
+
+        private static bool HasValidFormCredentials(OAuthValidateClientAuthenticationContext ctx, out string clientId)
+        {
+            string clientSecret;
+            return ctx.TryGetFormCredentials(out clientId, out clientSecret)
+                   && clientId.Equals("MyFormId")
+                   && clientSecret.Equals("MyFormSecret");
         }
     }
 }

@@ -42,51 +42,50 @@ namespace OAuth2ClientHandler.Authorizer
             }
         }
 
-        private async Task<TokenResponse> GetTokenWithClientCredentials(CancellationToken cancellationToken)
+        private Task<TokenResponse> GetTokenWithClientCredentials(CancellationToken cancellationToken)
         {
             if (options.TokenEndpointUrl == null) throw new ArgumentNullException("TokenEndpointUrl");
             if (!options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("TokenEndpointUrl must be absolute");
-            using (var client = this.createHttpClient())
+
+            var properties = new Dictionary<string, string>
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthorizationHeaderValue());
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                { "grant_type", "client_credentials" }
+            };
 
-                var properties = new Dictionary<string, string> { { "grant_type", "client_credentials" } };
-                if (options.Scope != null) properties.Add("scope", string.Join(" ", options.Scope));
-
-                var content = new FormUrlEncodedContent(properties);
-
-                var response = await client.PostAsync(options.TokenEndpointUrl, content, cancellationToken);
-                if (cancellationToken.IsCancellationRequested) return null;
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    RaiseProtocolException(response.StatusCode, await response.Content.ReadAsStringAsync());
-                    return null;
-                }
-
-                var serializer = new DataContractJsonSerializer(typeof(TokenResponse));
-                return serializer.ReadObject(await response.Content.ReadAsStreamAsync()) as TokenResponse;
-            }
+            return GetToken(properties, cancellationToken);
         }
 
-        private async Task<TokenResponse> GetTokenWithResourceOwnerPasswordCredentials(CancellationToken cancellationToken)
+        private Task<TokenResponse> GetTokenWithResourceOwnerPasswordCredentials(CancellationToken cancellationToken)
         {
             if (options.TokenEndpointUrl == null) throw new ArgumentNullException("TokenEndpointUrl");
             if (!options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("TokenEndpointUrl must be absolute");
             if (options.Username == null) throw new ArgumentNullException("Username");
             if (options.Password == null) throw new ArgumentNullException("Password");
+
+            var properties = new Dictionary<string, string>
+            {
+                { "grant_type", "password" },
+                { "username", options.Username },
+                { "password", options.Password }
+            };
+
+            return GetToken(properties, cancellationToken);
+        }
+
+        private async Task<TokenResponse> GetToken(IDictionary<string, string> properties, CancellationToken cancellationToken)
+        {
             using (var client = this.createHttpClient())
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthorizationHeaderValue());
+                if (options.CredentialTransportMethod == CredentialTransportMethod.BasicAuthenticationCredentials)
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthorizationHeaderValue());
+                else if (options.CredentialTransportMethod == CredentialTransportMethod.FormAuthenticationCredentials)
+                {
+                    properties.Add("client_id", options.ClientId);
+                    properties.Add("client_secret", options.ClientSecret);
+                }
+
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var properties = new Dictionary<string, string>
-                {
-                    { "grant_type", "password" },
-                    { "username", options.Username },
-                    { "password", options.Password }
-                };
                 if (options.Scope != null) properties.Add("scope", string.Join(" ", options.Scope));
 
                 var content = new FormUrlEncodedContent(properties);
