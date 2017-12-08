@@ -6,7 +6,7 @@ Managed .NET (C#) library for use with HttpClient to transparantly call authoriz
 
 ## Get it on NuGet
 
-    Install-Package OAuth2ClientHandler
+    PM> Install-Package OAuth2ClientHandler
 
 ## Usage
 
