@@ -3,12 +3,12 @@ using System.Net;
 
 namespace OAuth2ClientHandler
 {
-    public class ProtocolException : Exception
+    public sealed class ProtocolException : Exception
     {
         public ProtocolException(HttpStatusCode statusCode, string message)
             : base(message)
         {
-            this.StatusCode = statusCode;
+            StatusCode = statusCode;
         }
 
         public HttpStatusCode StatusCode { get; private set; }

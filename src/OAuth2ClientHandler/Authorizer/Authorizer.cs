@@ -10,17 +10,15 @@ using System.Threading.Tasks;
 
 namespace OAuth2ClientHandler.Authorizer
 {
-    internal class Authorizer : IAuthorizer
+    internal sealed class Authorizer : IAuthorizer
     {
-        private AuthorizerOptions options;
-        private Func<HttpClient> createHttpClient;
+        private readonly AuthorizerOptions _options;
+        private readonly Func<HttpClient> _createHttpClient;
 
         internal Authorizer(AuthorizerOptions options, Func<HttpClient> createHttpClient)
         {
-            if (options == null) throw new ArgumentNullException("options");
-            if (createHttpClient == null) throw new ArgumentNullException("createHttpClient");
-            this.options = options;
-            this.createHttpClient = createHttpClient;
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _createHttpClient = createHttpClient ?? throw new ArgumentNullException(nameof(createHttpClient));
         }
 
         public Authorizer(AuthorizerOptions options)
@@ -31,21 +29,21 @@ namespace OAuth2ClientHandler.Authorizer
         public async Task<TokenResponse> GetToken(CancellationToken? cancellationToken = null)
         {
             cancellationToken = cancellationToken ?? new CancellationToken(false);
-            switch (options.GrantType)
+            switch (_options.GrantType)
             {
                 case GrantType.ClientCredentials:
                     return await GetTokenWithClientCredentials(cancellationToken.Value);
                 case GrantType.ResourceOwnerPasswordCredentials:
                     return await GetTokenWithResourceOwnerPasswordCredentials(cancellationToken.Value);
                 default:
-                    throw new NotSupportedException(string.Format("Requested grant type '{0}' is not supported", options.GrantType));
+                    throw new NotSupportedException($"Requested grant type '{_options.GrantType}' is not supported");
             }
         }
 
         private Task<TokenResponse> GetTokenWithClientCredentials(CancellationToken cancellationToken)
         {
-            if (options.TokenEndpointUrl == null) throw new ArgumentNullException("TokenEndpointUrl");
-            if (!options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("TokenEndpointUrl must be absolute");
+            if (_options.TokenEndpointUrl == null) throw new ArgumentNullException(nameof(_options.TokenEndpointUrl));
+            if (!_options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("Must be absolute", nameof(_options.TokenEndpointUrl));
 
             var properties = new Dictionary<string, string>
             {
@@ -57,16 +55,16 @@ namespace OAuth2ClientHandler.Authorizer
 
         private Task<TokenResponse> GetTokenWithResourceOwnerPasswordCredentials(CancellationToken cancellationToken)
         {
-            if (options.TokenEndpointUrl == null) throw new ArgumentNullException("TokenEndpointUrl");
-            if (!options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("TokenEndpointUrl must be absolute");
-            if (options.Username == null) throw new ArgumentNullException("Username");
-            if (options.Password == null) throw new ArgumentNullException("Password");
+            if (_options.TokenEndpointUrl == null) throw new ArgumentNullException(nameof(_options.TokenEndpointUrl));
+            if (!_options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("Must be absolute", nameof(_options.TokenEndpointUrl));
+            if (_options.Username == null) throw new ArgumentNullException(nameof(_options.Username));
+            if (_options.Password == null) throw new ArgumentNullException(nameof(_options.Password));
 
             var properties = new Dictionary<string, string>
             {
                 { "grant_type", "password" },
-                { "username", options.Username },
-                { "password", options.Password }
+                { "username", _options.Username },
+                { "password", _options.Password }
             };
 
             return GetToken(properties, cancellationToken);
@@ -74,23 +72,28 @@ namespace OAuth2ClientHandler.Authorizer
 
         private async Task<TokenResponse> GetToken(IDictionary<string, string> properties, CancellationToken cancellationToken)
         {
-            using (var client = this.createHttpClient())
+            using (var client = _createHttpClient())
             {
-                if (options.CredentialTransportMethod == CredentialTransportMethod.BasicAuthenticationCredentials)
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthorizationHeaderValue());
-                else if (options.CredentialTransportMethod == CredentialTransportMethod.FormAuthenticationCredentials)
+                switch (_options.CredentialTransportMethod)
                 {
-                    properties.Add("client_id", options.ClientId);
-                    properties.Add("client_secret", options.ClientSecret);
+                    case CredentialTransportMethod.BasicAuthenticationCredentials:
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicAuthorizationHeaderValue());
+                        break;
+                    case CredentialTransportMethod.FormAuthenticationCredentials:
+                        properties.Add("client_id", _options.ClientId);
+                        properties.Add("client_secret", _options.ClientSecret);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                if (options.Scope != null) properties.Add("scope", string.Join(" ", options.Scope));
+                if (_options.Scope != null) properties.Add("scope", string.Join(" ", _options.Scope));
 
                 var content = new FormUrlEncodedContent(properties);
 
-                var response = await client.PostAsync(options.TokenEndpointUrl, content, cancellationToken);
+                var response = await client.PostAsync(_options.TokenEndpointUrl, content, cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
 
                 if (!response.IsSuccessStatusCode)
@@ -106,14 +109,14 @@ namespace OAuth2ClientHandler.Authorizer
 
         private string GetBasicAuthorizationHeaderValue()
         {
-            if (options.ClientId == null) throw new ArgumentNullException("ClientId");
-            if (options.ClientSecret == null) throw new ArgumentNullException("ClientSecret");
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", options.ClientId, options.ClientSecret)));
+            if (_options.ClientId == null) throw new ArgumentNullException(nameof(_options.ClientId));
+            if (_options.ClientSecret == null) throw new ArgumentNullException(nameof(_options.ClientSecret));
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_options.ClientId}:{_options.ClientSecret}"));
         }
 
         private void RaiseProtocolException(HttpStatusCode statusCode, string message)
         {
-            if (options.OnError != null) options.OnError(statusCode, message);
+            if (_options.OnError != null) _options.OnError(statusCode, message);
             else throw new ProtocolException(statusCode, message);
         }
     }

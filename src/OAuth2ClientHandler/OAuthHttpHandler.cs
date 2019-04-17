@@ -10,27 +10,25 @@ namespace OAuth2ClientHandler
 {
     public class OAuthHttpHandler : DelegatingHandler
     {
-        private const string AuthorizationHeaderName = "Authorization";
-        private OAuthHttpHandlerOptions options;
-        private bool ownsHandler = false;
-        private IAuthorizer authorizer;
-        private TokenResponse tokenResponse;
-        private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        private readonly OAuthHttpHandlerOptions _options;
+        private readonly bool _ownsHandler = false;
+        private readonly IAuthorizer _authorizer;
+        private TokenResponse _tokenResponse;
 
         public OAuthHttpHandler(OAuthHttpHandlerOptions options)
         {
-            if (options == null) throw new ArgumentNullException("authorizer");
-            this.options = options;
+            _options = options ?? throw new ArgumentNullException(nameof(options));
             InnerHandler = options.InnerHandler ?? new HttpClientHandler();
-            ownsHandler = options.InnerHandler == null;
-            authorizer = new Authorizer.Authorizer(options.AuthorizerOptions, () => new HttpClient(InnerHandler, false));
+            _ownsHandler = options.InnerHandler == null;
+            _authorizer = new Authorizer.Authorizer(options.AuthorizerOptions, () => new HttpClient(InnerHandler, false));
         }
 
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
 
-            if (disposing && ownsHandler)
+            if (disposing && _ownsHandler)
                 InnerHandler.Dispose();
         }
 
@@ -45,7 +43,7 @@ namespace OAuth2ClientHandler
 
             var response = await base.SendAsync(request, cancellationToken);
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
             {
                 var tokenResponse = await RefreshTokenResponse(cancellationToken);
                 if (tokenResponse != null)
@@ -62,14 +60,14 @@ namespace OAuth2ClientHandler
         {
             try
             {
-                semaphore.Wait(cancellationToken);
+                _semaphore.Wait(cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
-                tokenResponse = tokenResponse ?? await authorizer.GetToken(cancellationToken);
-                return tokenResponse;
+                _tokenResponse = _tokenResponse ?? await _authorizer.GetToken(cancellationToken);
+                return _tokenResponse;
             }
             finally
             {
-                semaphore.Release();
+                _semaphore.Release();
             }
         }
 
@@ -77,14 +75,14 @@ namespace OAuth2ClientHandler
         {
             try
             {
-                semaphore.Wait(cancellationToken);
+                _semaphore.Wait(cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
-                tokenResponse = await authorizer.GetToken(cancellationToken);
-                return tokenResponse;
+                _tokenResponse = await _authorizer.GetToken(cancellationToken);
+                return _tokenResponse;
             }
             finally
             {
-                semaphore.Release();
+                _semaphore.Release();
             }
         }
     }

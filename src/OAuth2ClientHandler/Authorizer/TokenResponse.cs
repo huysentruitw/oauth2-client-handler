@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace OAuth2ClientHandler.Authorizer
 {
     [DataContract]
-    internal class TokenResponse
+    internal sealed class TokenResponse
     {
         [DataMember(Name = "access_token")]
         public string AccessToken { get; set; }
@@ -15,6 +15,6 @@ namespace OAuth2ClientHandler.Authorizer
         [DataMember(Name = "expires_in")]
         public int ExpiresInSeconds { private get; set; }
 
-        public TimeSpan ExpiresIn { get { return TimeSpan.FromSeconds(ExpiresInSeconds); } }
+        public TimeSpan ExpiresIn => TimeSpan.FromSeconds(ExpiresInSeconds);
     }
 }

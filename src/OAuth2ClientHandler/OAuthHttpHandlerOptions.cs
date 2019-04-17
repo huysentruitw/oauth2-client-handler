@@ -3,7 +3,7 @@ using OAuth2ClientHandler.Authorizer;
 
 namespace OAuth2ClientHandler
 {
-    public class OAuthHttpHandlerOptions
+    public sealed class OAuthHttpHandlerOptions
     {
         public AuthorizerOptions AuthorizerOptions { get; set; }
         public HttpMessageHandler InnerHandler { get; set; }

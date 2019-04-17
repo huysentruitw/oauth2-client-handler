@@ -4,7 +4,7 @@ using System.Net;
 
 namespace OAuth2ClientHandler.Authorizer
 {
-    public class AuthorizerOptions
+    public sealed class AuthorizerOptions
     {
         public Uri TokenEndpointUrl { get; set; }
         public Uri AuthorizeEndpointUrl { get; set; }
