@@ -6,24 +6,26 @@ using Microsoft.Owin.Testing;
 using NUnit.Framework;
 using OAuth2ClientHandler.Authorizer;
 
-namespace OAuth2ClientHandler.Tests
+namespace OAuth2ClientHandler.Tests.Net45
 {
     [TestFixture]
     public class OAuthMessageHandlerTests
     {
-        private TestServer server;
+        private TestServer _server;
 
-        [TestFixtureSetUp]
-        public void FixtureSetUp()
+        [SetUp]
+        public void SetUp()
         {
-            server = TestServer.Create<Startup>();
+            _server = TestServer.Create<Startup>();
         }
 
-        [TestFixtureTearDown]
-        public void FixtureTearDown()
+        [TearDown]
+        public void TearDown()
         {
-            server.Dispose();
+            _server.Dispose();
         }
+
+        private HttpMessageHandler Handler => _server.Handler;
 
         [Test]
         public async Task OAuthHttpHandler_ValidClientCredentials_ShouldReturnOk()
@@ -38,7 +40,7 @@ namespace OAuth2ClientHandler.Tests
                     ClientSecret = "MySecret",
                     GrantType = GrantType.ClientCredentials
                 },
-                InnerHandler = server.Handler
+                InnerHandler = Handler
             };
 
             using (var client = new HttpClient(new OAuthHttpHandler(options)))
@@ -62,13 +64,13 @@ namespace OAuth2ClientHandler.Tests
                     ClientSecret = "WrongSecret",
                     GrantType = GrantType.ClientCredentials
                 },
-                InnerHandler = server.Handler
+                InnerHandler = Handler
             };
 
             using (var client = new HttpClient(new OAuthHttpHandler(options)))
             {
                 client.BaseAddress = new Uri("http://localhost");
-                var ex = Assert.Throws<ProtocolException>(async () => await client.GetAsync("/api/authorize"));
+                var ex = Assert.ThrowsAsync<ProtocolException>(async () => await client.GetAsync("/api/authorize"));
                 Assert.AreEqual(HttpStatusCode.BadRequest, ex.StatusCode);
             }
         }
@@ -87,7 +89,7 @@ namespace OAuth2ClientHandler.Tests
                     GrantType = GrantType.ClientCredentials,
                     OnError = (statusCode, message) => { }
                 },
-                InnerHandler = server.Handler
+                InnerHandler = Handler
             };
 
             using (var client = new HttpClient(new OAuthHttpHandler(options)))
@@ -111,7 +113,7 @@ namespace OAuth2ClientHandler.Tests
                     ClientSecret = "MySecret",
                     GrantType = GrantType.ClientCredentials
                 },
-                InnerHandler = server.Handler
+                InnerHandler = Handler
             };
 
             using (var client = new HttpClient(new OAuthHttpHandler(options)))
@@ -135,7 +137,7 @@ namespace OAuth2ClientHandler.Tests
                     ClientSecret = "MySecret",
                     GrantType = GrantType.ClientCredentials
                 },
-                InnerHandler = server.Handler
+                InnerHandler = Handler
             };
 
             using (var client = new HttpClient(new OAuthHttpHandler(options)))

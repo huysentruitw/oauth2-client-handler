@@ -1,22 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OAuth2ClientHandler", "src\OAuth2ClientHandler\OAuth2ClientHandler.csproj", "{D9DA6892-068D-4263-B8EA-EBFEB5362259}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OAuth2ClientHandler", "src\OAuth2ClientHandler\OAuth2ClientHandler.csproj", "{D9DA6892-068D-4263-B8EA-EBFEB5362259}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{81B207A5-C39F-4E9D-8F5E-98F605C24CA8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{FBCDFB4C-915C-48D4-83BA-52CD3711E3B1}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OAuth2ClientHandler.Tests", "tests\OAuth2ClientHandler.Tests\OAuth2ClientHandler.Tests.csproj", "{6735C1C6-01D8-48D6-AA1A-4BB1499C5153}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{90C8F43F-DBE9-4B9B-9EA8-25A67BC3E971}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DF0B3612-FBEF-4365-BB95-99E5C8F895F0}"
 	ProjectSection(SolutionItems) = preProject
@@ -24,6 +15,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OAuth2ClientHandler.Tests.NetCore", "tests\OAuth2ClientHandler.Tests.NetCore\OAuth2ClientHandler.Tests.NetCore.csproj", "{475BCC9B-B684-4DBD-B5B4-74ABCCB9F5A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OAuth2ClientHandler.Tests.Net45", "tests\OAuth2ClientHandler.Tests.Net45\OAuth2ClientHandler.Tests.Net45.csproj", "{FD2C8C3C-4D26-420E-A96F-CEA3172DE4CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,16 +30,24 @@ Global
 		{D9DA6892-068D-4263-B8EA-EBFEB5362259}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9DA6892-068D-4263-B8EA-EBFEB5362259}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9DA6892-068D-4263-B8EA-EBFEB5362259}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6735C1C6-01D8-48D6-AA1A-4BB1499C5153}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6735C1C6-01D8-48D6-AA1A-4BB1499C5153}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6735C1C6-01D8-48D6-AA1A-4BB1499C5153}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6735C1C6-01D8-48D6-AA1A-4BB1499C5153}.Release|Any CPU.Build.0 = Release|Any CPU
+		{475BCC9B-B684-4DBD-B5B4-74ABCCB9F5A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{475BCC9B-B684-4DBD-B5B4-74ABCCB9F5A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{475BCC9B-B684-4DBD-B5B4-74ABCCB9F5A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{475BCC9B-B684-4DBD-B5B4-74ABCCB9F5A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD2C8C3C-4D26-420E-A96F-CEA3172DE4CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD2C8C3C-4D26-420E-A96F-CEA3172DE4CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD2C8C3C-4D26-420E-A96F-CEA3172DE4CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD2C8C3C-4D26-420E-A96F-CEA3172DE4CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D9DA6892-068D-4263-B8EA-EBFEB5362259} = {81B207A5-C39F-4E9D-8F5E-98F605C24CA8}
-		{6735C1C6-01D8-48D6-AA1A-4BB1499C5153} = {FBCDFB4C-915C-48D4-83BA-52CD3711E3B1}
+		{475BCC9B-B684-4DBD-B5B4-74ABCCB9F5A0} = {FBCDFB4C-915C-48D4-83BA-52CD3711E3B1}
+		{FD2C8C3C-4D26-420E-A96F-CEA3172DE4CD} = {FBCDFB4C-915C-48D4-83BA-52CD3711E3B1}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {48423BA3-25B0-41EA-910E-37851EB72A94}
 	EndGlobalSection
 EndGlobal

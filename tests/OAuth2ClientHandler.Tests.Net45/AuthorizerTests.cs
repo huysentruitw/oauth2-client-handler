@@ -1,28 +1,31 @@
 ﻿using System;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Owin.Testing;
 using NUnit.Framework;
 using OAuth2ClientHandler.Authorizer;
 
-namespace OAuth2ClientHandler.Tests
+namespace OAuth2ClientHandler.Tests.Net45
 {
     [TestFixture]
     public class AuthorizerTests
     {
-        private TestServer server;
+        private TestServer _server;
 
-        [TestFixtureSetUp]
-        public void FixtureSetUp()
+        [SetUp]
+        public void SetUp()
         {
-            server = TestServer.Create<Startup>();
+            _server = TestServer.Create<Startup>();
         }
 
-        [TestFixtureTearDown]
-        public void FixtureTearDown()
+        [TearDown]
+        public void TearDown()
         {
-            server.Dispose();
+            _server.Dispose();
         }
+
+        private HttpClient HttpClient => _server.HttpClient;
 
         [Test]
         public async Task GetToken_ValidClientCredentials_ReturnsValidAccessToken()
@@ -36,7 +39,7 @@ namespace OAuth2ClientHandler.Tests
                 GrantType = GrantType.ClientCredentials
             };
 
-            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
+            var authorizer = new Authorizer.Authorizer(options, () => HttpClient);
             var result = await authorizer.GetToken();
             Assert.NotNull(result.AccessToken);
         }
@@ -54,7 +57,7 @@ namespace OAuth2ClientHandler.Tests
                 CredentialTransportMethod = CredentialTransportMethod.FormAuthenticationCredentials
             };
 
-            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
+            var authorizer = new Authorizer.Authorizer(options, () => HttpClient);
             var result = await authorizer.GetToken();
             Assert.NotNull(result.AccessToken);
         }
@@ -71,9 +74,9 @@ namespace OAuth2ClientHandler.Tests
                 GrantType = GrantType.ClientCredentials
             };
 
-            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
+            var authorizer = new Authorizer.Authorizer(options, () => HttpClient);
             
-            var ex = Assert.Throws<ProtocolException>(async () => await authorizer.GetToken());
+            var ex = Assert.ThrowsAsync<ProtocolException>(async () => await authorizer.GetToken());
             
             Assert.IsTrue(ex.Message.Contains("invalid_client"));
             Assert.AreEqual(HttpStatusCode.BadRequest, ex.StatusCode);
@@ -99,7 +102,7 @@ namespace OAuth2ClientHandler.Tests
                 }
             };
 
-            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
+            var authorizer = new Authorizer.Authorizer(options, () => HttpClient);
 
             await authorizer.GetToken();
 
@@ -119,8 +122,8 @@ namespace OAuth2ClientHandler.Tests
                 GrantType = GrantType.ClientCredentials
             };
 
-            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
-            var ex = Assert.Throws<ProtocolException>(async () => await authorizer.GetToken());
+            var authorizer = new Authorizer.Authorizer(options, () => HttpClient);
+            var ex = Assert.ThrowsAsync<ProtocolException>(async () => await authorizer.GetToken());
             Assert.AreEqual(HttpStatusCode.NotFound, ex.StatusCode);
         }
 
@@ -137,8 +140,8 @@ namespace OAuth2ClientHandler.Tests
                 Scope = new[] { "testscope" }
             };
 
-            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
-            var ex = Assert.Throws<ProtocolException>(async () => await authorizer.GetToken());
+            var authorizer = new Authorizer.Authorizer(options, () => HttpClient);
+            var ex = Assert.ThrowsAsync<ProtocolException>(async () => await authorizer.GetToken());
             Assert.IsTrue(ex.Message.Contains("testscope_ok"));
         }
 
@@ -156,7 +159,7 @@ namespace OAuth2ClientHandler.Tests
                 GrantType = GrantType.ResourceOwnerPasswordCredentials
             };
 
-            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
+            var authorizer = new Authorizer.Authorizer(options, () => HttpClient);
             var result = await authorizer.GetToken();
             Assert.NotNull(result.AccessToken);
         }
@@ -175,9 +178,9 @@ namespace OAuth2ClientHandler.Tests
                 GrantType = GrantType.ResourceOwnerPasswordCredentials
             };
 
-            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
+            var authorizer = new Authorizer.Authorizer(options, () => HttpClient);
 
-            var ex = Assert.Throws<ProtocolException>(async () => await authorizer.GetToken());
+            var ex = Assert.ThrowsAsync<ProtocolException>(async () => await authorizer.GetToken());
 
             Assert.IsTrue(ex.Message.Contains("invalid_grant"));
             Assert.AreEqual(HttpStatusCode.BadRequest, ex.StatusCode);
@@ -205,7 +208,7 @@ namespace OAuth2ClientHandler.Tests
                 }
             };
 
-            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
+            var authorizer = new Authorizer.Authorizer(options, () => HttpClient);
 
             await authorizer.GetToken();
 
@@ -228,8 +231,8 @@ namespace OAuth2ClientHandler.Tests
                 Scope = new[] { "othertestscope" }
             };
 
-            var authorizer = new Authorizer.Authorizer(options, () => server.HttpClient);
-            var ex = Assert.Throws<ProtocolException>(async () => await authorizer.GetToken());
+            var authorizer = new Authorizer.Authorizer(options, () => HttpClient);
+            var ex = Assert.ThrowsAsync<ProtocolException>(async () => await authorizer.GetToken());
             Assert.IsTrue(ex.Message.Contains("othertestscope_ok"));
         }
     }
