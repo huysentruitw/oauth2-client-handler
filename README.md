@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/9fepyg7kuhgmulh1/branch/master?svg=true)](https://ci.appveyor.com/project/huysentruitw/oauth2-client-handler/branch/master)
 
-Managed .NET library for use with HttpClient to transparantly call authorized remote API.
+Managed .NET library for use with HttpClient to transparantly call authorized remote API protected with OAuth2 or OpenID Connect.
 
 Supports .NET Framework 4.5+ and .NET Standard / .NET Core.
 
