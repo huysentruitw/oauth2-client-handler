@@ -19,9 +19,11 @@ namespace OAuth2ClientHandler
         {
             if (options == null) { throw new ArgumentNullException(nameof(options)); }
 
-#if NETFRAMEWORK
-            InnerHandler = options.InnerHandler ?? _defaultHttpHandler.Value;
-#endif
+            if (options.InnerHandler != null)
+            {
+                InnerHandler = options.InnerHandler;
+            }
+
             _authorizer = new Authorizer.Authorizer(options.AuthorizerOptions, createAuthorizerHttpClient ?? (() => new HttpClient(options.InnerHandler ?? _defaultHttpHandler.Value, false)));
         }
 
