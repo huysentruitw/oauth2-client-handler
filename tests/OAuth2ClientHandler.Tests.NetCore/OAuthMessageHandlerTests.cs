@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using OAuth2ClientHandler.Authorizer;
 using OAuth2ClientHandler.Tests.NetCore.Helpers;
@@ -149,5 +150,60 @@ namespace OAuth2ClientHandler.Tests.NetCore
                 Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
             }
         }
+        
+        [Test]
+        public async Task OAuthHttpHandler_WithHttpClientFactory_OmittedExplicitInnerHandler_ShouldReturnOk()
+        {
+            var options = new OAuthHttpHandlerOptions
+            {
+                AuthorizerOptions = new AuthorizerOptions
+                {
+                    AuthorizeEndpointUrl = new Uri(_server.BaseAddress, "/connect/authorize"),
+                    TokenEndpointUrl = new Uri(_server.BaseAddress, "/connect/token"),
+                    ClientId = "MyId",
+                    ClientSecret = "MySecret",
+                    GrantType = GrantType.ClientCredentials,
+                    Scope = new[] { "test" }
+                }
+            };
+
+            var services = new ServiceCollection();
+            services
+                .AddHttpClient("test")
+                .AddHttpMessageHandler(_ => new OAuthHttpHandler(options, () => new HttpClient(_handler, false)))
+                .ConfigurePrimaryHttpMessageHandler(() => _handler);
+
+            using (var client = services.BuildServiceProvider().GetRequiredService<IHttpClientFactory>().CreateClient("test"))
+            {
+                client.BaseAddress = _server.BaseAddress;
+                var response = await client.GetAsync("/api/authorize");
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            }
+        }
+
+        [Test]
+        public void OAuthHttpHandler_WithHttpClientFactory_ExplicitInnerHandler_ShouldFail()
+        {
+            var options = new OAuthHttpHandlerOptions
+            {
+                AuthorizerOptions = new AuthorizerOptions
+                {
+                    AuthorizeEndpointUrl = new Uri(_server.BaseAddress, "/connect/authorize"),
+                    TokenEndpointUrl = new Uri(_server.BaseAddress, "/connect/token"),
+                    ClientId = "MyId",
+                    ClientSecret = "MySecret",
+                    GrantType = GrantType.ClientCredentials,
+                    Scope = new[] { "test" }
+                },
+                InnerHandler = _handler
+            };
+
+            var services = new ServiceCollection();
+            services
+                .AddHttpClient("test")
+                .AddHttpMessageHandler(_ => new OAuthHttpHandler(options));
+
+            Assert.Throws<InvalidOperationException>(() => services.BuildServiceProvider().GetRequiredService<IHttpClientFactory>().CreateClient("test"));
+        }        
     }
 }
