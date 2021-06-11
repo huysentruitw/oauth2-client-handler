@@ -11,25 +11,31 @@ namespace OAuth2ClientHandler
     public class OAuthHttpHandler : DelegatingHandler
     {
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-        private readonly OAuthHttpHandlerOptions _options;
-        private readonly bool _ownsHandler = false;
         private readonly IAuthorizer _authorizer;
         private TokenResponse _tokenResponse;
+        private readonly Lazy<HttpClientHandler> _defaultHttpHandler = new Lazy<HttpClientHandler>(() => new HttpClientHandler());
 
-        public OAuthHttpHandler(OAuthHttpHandlerOptions options)
+        public OAuthHttpHandler(OAuthHttpHandlerOptions options, Func<HttpClient> createAuthorizerHttpClient = null) 
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
-            InnerHandler = options.InnerHandler ?? new HttpClientHandler();
-            _ownsHandler = options.InnerHandler == null;
-            _authorizer = new Authorizer.Authorizer(options.AuthorizerOptions, () => new HttpClient(InnerHandler, false));
+            if (options == null) { throw new ArgumentNullException(nameof(options)); }
+
+            if (options.InnerHandler != null)
+            {
+                InnerHandler = options.InnerHandler;
+            }
+
+            _authorizer = new Authorizer.Authorizer(options.AuthorizerOptions, createAuthorizerHttpClient ?? (() => new HttpClient(options.InnerHandler ?? _defaultHttpHandler.Value, false)));
         }
 
+        
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
 
-            if (disposing && _ownsHandler)
-                InnerHandler.Dispose();
+            if (disposing && _defaultHttpHandler.IsValueCreated)
+            {
+                _defaultHttpHandler.Value.Dispose();
+            }
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
