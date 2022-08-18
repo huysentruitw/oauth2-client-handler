@@ -25,7 +25,12 @@ var options = new OAuthHttpHandlerOptions
     }
 };
 
-using (var client = new HttpClient(new OAuthHttpHandler(options)))
+var oAuthHttpHandler = new OAuthHttpHandler(options)
+{
+    InnerHandler = new HttpClientHandler()
+};
+
+using (var client = new HttpClient(oAuthHttpHandler))
 {
     client.BaseAddress = new Uri("http://localhost");
     var response = await client.GetAsync("/api/protected_api_call");
