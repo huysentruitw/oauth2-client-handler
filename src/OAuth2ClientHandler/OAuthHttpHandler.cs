@@ -11,32 +11,42 @@ namespace OAuth2ClientHandler
     public class OAuthHttpHandler : DelegatingHandler
     {
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-        private readonly Lazy<HttpClientHandler> _defaultHttpHandler = new Lazy<HttpClientHandler>(() => new HttpClientHandler());
         private readonly IAuthorizer _authorizer;
         private TokenResponse _tokenResponse;
+
+        public string AccessToken
+        {
+            get
+            {
+                if(_tokenResponse == null)
+                    _tokenResponse = GetTokenResponse(CancellationToken.None).Result;
+                return _tokenResponse.AccessToken;
+            }
+        }
 
         public OAuthHttpHandler(OAuthHttpHandlerOptions options, Func<HttpClient> createAuthorizerHttpClient = null)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            if (options.InnerHandler != null)
-                InnerHandler = options.InnerHandler;
+            InnerHandler = options.InnerHandler ?? new HttpClientHandler();
 
-            _authorizer = new Authorizer.Authorizer(options.AuthorizerOptions, createAuthorizerHttpClient ?? CreateHttpClient);
+            _authorizer = new Authorizer.Authorizer(options.AuthorizerOptions,
+                createAuthorizerHttpClient ?? CreateHttpClient);
         }
 
-        private HttpClient CreateHttpClient() => new HttpClient(InnerHandler ?? _defaultHttpHandler.Value, false);
+        private HttpClient CreateHttpClient() => new HttpClient(InnerHandler, false);
 
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
 
-            if (disposing && _defaultHttpHandler.IsValueCreated)
-                _defaultHttpHandler.Value.Dispose();
+            if (disposing)
+                InnerHandler?.Dispose();
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+            CancellationToken cancellationToken)
         {
             if (request.Headers.Authorization == null)
             {
