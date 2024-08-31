@@ -16,6 +16,7 @@ namespace OAuth2ClientHandler.Authorizer
         public GrantType GrantType { get; set; }
         public CredentialTransportMethod CredentialTransportMethod { get; set; }
         public Action<HttpStatusCode, string> OnError { get; set; }
+        public Converter<System.IO.Stream, TokenData> TokenDataDeserializer { get; set; }
 
         public AuthorizerOptions()
         {

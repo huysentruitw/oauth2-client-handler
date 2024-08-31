@@ -13,7 +13,7 @@ namespace OAuth2ClientHandler
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         private readonly Lazy<HttpClientHandler> _defaultHttpHandler = new Lazy<HttpClientHandler>(() => new HttpClientHandler());
         private readonly IAuthorizer _authorizer;
-        private TokenResponse _tokenResponse;
+        private TokenData _tokenData;
 
         public OAuthHttpHandler(OAuthHttpHandlerOptions options, Func<HttpClient> createAuthorizerHttpClient = null)
         {
@@ -40,7 +40,7 @@ namespace OAuth2ClientHandler
         {
             if (request.Headers.Authorization == null)
             {
-                var tokenResponse = await GetTokenResponse(cancellationToken);
+                var tokenResponse = await GetTokenData(cancellationToken);
                 if (tokenResponse != null)
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.AccessToken);
             }
@@ -49,7 +49,7 @@ namespace OAuth2ClientHandler
 
             if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
             {
-                var tokenResponse = await RefreshTokenResponse(cancellationToken);
+                var tokenResponse = await RefreshTokenData(cancellationToken);
                 if (tokenResponse != null)
                 {
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.AccessToken);
@@ -60,14 +60,14 @@ namespace OAuth2ClientHandler
             return response;
         }
 
-        private async Task<TokenResponse> GetTokenResponse(CancellationToken cancellationToken)
+        private async Task<TokenData> GetTokenData(CancellationToken cancellationToken)
         {
             try
             {
                 _semaphore.Wait(cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
-                _tokenResponse = _tokenResponse ?? await _authorizer.GetToken(cancellationToken);
-                return _tokenResponse;
+                _tokenData = _tokenData ?? await _authorizer.GetToken(cancellationToken);
+                return _tokenData;
             }
             finally
             {
@@ -75,14 +75,14 @@ namespace OAuth2ClientHandler
             }
         }
 
-        private async Task<TokenResponse> RefreshTokenResponse(CancellationToken cancellationToken)
+        private async Task<TokenData> RefreshTokenData(CancellationToken cancellationToken)
         {
             try
             {
                 _semaphore.Wait(cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
-                _tokenResponse = await _authorizer.GetToken(cancellationToken);
-                return _tokenResponse;
+                _tokenData = await _authorizer.GetToken(cancellationToken);
+                return _tokenData;
             }
             finally
             {

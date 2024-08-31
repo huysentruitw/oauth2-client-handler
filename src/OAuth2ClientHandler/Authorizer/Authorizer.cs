@@ -26,7 +26,7 @@ namespace OAuth2ClientHandler.Authorizer
         {
         }
 
-        public async Task<TokenResponse> GetToken(CancellationToken? cancellationToken = null)
+        public async Task<TokenData> GetToken(CancellationToken? cancellationToken = null)
         {
             cancellationToken = cancellationToken ?? new CancellationToken(false);
             switch (_options.GrantType)
@@ -40,7 +40,7 @@ namespace OAuth2ClientHandler.Authorizer
             }
         }
 
-        private Task<TokenResponse> GetTokenWithClientCredentials(CancellationToken cancellationToken)
+        private Task<TokenData> GetTokenWithClientCredentials(CancellationToken cancellationToken)
         {
             if (_options.TokenEndpointUrl == null) throw new ArgumentNullException(nameof(_options.TokenEndpointUrl));
             if (!_options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("Must be absolute", nameof(_options.TokenEndpointUrl));
@@ -53,7 +53,7 @@ namespace OAuth2ClientHandler.Authorizer
             return GetToken(properties, cancellationToken);
         }
 
-        private Task<TokenResponse> GetTokenWithResourceOwnerPasswordCredentials(CancellationToken cancellationToken)
+        private Task<TokenData> GetTokenWithResourceOwnerPasswordCredentials(CancellationToken cancellationToken)
         {
             if (_options.TokenEndpointUrl == null) throw new ArgumentNullException(nameof(_options.TokenEndpointUrl));
             if (!_options.TokenEndpointUrl.IsAbsoluteUri) throw new ArgumentException("Must be absolute", nameof(_options.TokenEndpointUrl));
@@ -70,7 +70,7 @@ namespace OAuth2ClientHandler.Authorizer
             return GetToken(properties, cancellationToken);
         }
 
-        private async Task<TokenResponse> GetToken(IDictionary<string, string> properties, CancellationToken cancellationToken)
+        private async Task<TokenData> GetToken(IDictionary<string, string> properties, CancellationToken cancellationToken)
         {
             using (var client = _createHttpClient())
             {
@@ -102,8 +102,10 @@ namespace OAuth2ClientHandler.Authorizer
                     return null;
                 }
 
-                var serializer = new DataContractJsonSerializer(typeof(TokenResponse));
-                return serializer.ReadObject(await response.Content.ReadAsStreamAsync()) as TokenResponse;
+                if (_options.TokenDataDeserializer != null)
+                    return _options.TokenDataDeserializer(await response.Content.ReadAsStreamAsync());
+                else
+                    return DefaultTokenDataDeserializer(await response.Content.ReadAsStreamAsync());
             }
         }
 
@@ -118,6 +120,19 @@ namespace OAuth2ClientHandler.Authorizer
         {
             if (_options.OnError != null) _options.OnError(statusCode, message);
             else throw new ProtocolException(statusCode, message);
+        }
+
+        private TokenData DefaultTokenDataDeserializer(System.IO.Stream stream)
+        {
+            var serializer = new DataContractJsonSerializer(typeof(DefaultTokenResponse));
+            var tokenResponse = serializer.ReadObject(stream) as DefaultTokenResponse;
+            return new TokenData()
+            {
+                AccessToken = tokenResponse.AccessToken,
+                TokenType = tokenResponse.TokenType,
+                RefreshToken = tokenResponse.RefreshToken,
+                ExpiresInSeconds = tokenResponse.ExpiresInSeconds
+            };
         }
     }
 }
