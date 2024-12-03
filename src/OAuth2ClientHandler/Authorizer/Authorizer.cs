@@ -32,9 +32,9 @@ namespace OAuth2ClientHandler.Authorizer
             switch (_options.GrantType)
             {
                 case GrantType.ClientCredentials:
-                    return await GetTokenWithClientCredentials(cancellationToken.Value);
+                    return await GetTokenWithClientCredentials(cancellationToken.Value).ConfigureAwait(false);
                 case GrantType.ResourceOwnerPasswordCredentials:
-                    return await GetTokenWithResourceOwnerPasswordCredentials(cancellationToken.Value);
+                    return await GetTokenWithResourceOwnerPasswordCredentials(cancellationToken.Value).ConfigureAwait(false);
                 default:
                     throw new NotSupportedException($"Requested grant type '{_options.GrantType}' is not supported");
             }
@@ -93,17 +93,17 @@ namespace OAuth2ClientHandler.Authorizer
 
                 var content = new FormUrlEncodedContent(properties);
 
-                var response = await client.PostAsync(_options.TokenEndpointUrl, content, cancellationToken);
+                var response = await client.PostAsync(_options.TokenEndpointUrl, content, cancellationToken).ConfigureAwait(false);
                 if (cancellationToken.IsCancellationRequested) return null;
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    RaiseProtocolException(response.StatusCode, await response.Content.ReadAsStringAsync());
+                    RaiseProtocolException(response.StatusCode, await response.Content.ReadAsStringAsync().ConfigureAwait(false));
                     return null;
                 }
 
                 var serializer = new DataContractJsonSerializer(typeof(TokenResponse));
-                return serializer.ReadObject(await response.Content.ReadAsStreamAsync()) as TokenResponse;
+                return serializer.ReadObject(await response.Content.ReadAsStreamAsync().ConfigureAwait(false)) as TokenResponse;
             }
         }
 

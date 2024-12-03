@@ -40,20 +40,20 @@ namespace OAuth2ClientHandler
         {
             if (request.Headers.Authorization == null)
             {
-                var tokenResponse = await GetTokenResponse(cancellationToken);
+                var tokenResponse = await GetTokenResponse(cancellationToken).ConfigureAwait(false);
                 if (tokenResponse != null)
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.AccessToken);
             }
 
-            var response = await base.SendAsync(request, cancellationToken);
+            var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
             {
-                var tokenResponse = await RefreshTokenResponse(cancellationToken);
+                var tokenResponse = await RefreshTokenResponse(cancellationToken).ConfigureAwait(false);
                 if (tokenResponse != null)
                 {
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.AccessToken);
-                    response = await base.SendAsync(request, cancellationToken);
+                    response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
                 }
             }
 
@@ -64,9 +64,9 @@ namespace OAuth2ClientHandler
         {
             try
             {
-                _semaphore.Wait(cancellationToken);
+                await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                 if (cancellationToken.IsCancellationRequested) return null;
-                _tokenResponse = _tokenResponse ?? await _authorizer.GetToken(cancellationToken);
+                _tokenResponse = _tokenResponse ?? await _authorizer.GetToken(cancellationToken).ConfigureAwait(false);
                 return _tokenResponse;
             }
             finally
@@ -79,9 +79,9 @@ namespace OAuth2ClientHandler
         {
             try
             {
-                _semaphore.Wait(cancellationToken);
+                await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                 if (cancellationToken.IsCancellationRequested) return null;
-                _tokenResponse = await _authorizer.GetToken(cancellationToken);
+                _tokenResponse = await _authorizer.GetToken(cancellationToken).ConfigureAwait(false);
                 return _tokenResponse;
             }
             finally
